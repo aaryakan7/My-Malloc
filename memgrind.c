@@ -5,27 +5,22 @@
 #include "mymalloc.h"
 
 // malloc() and immediately free() a 1-byte object, 120 times
-void test1(void) 
-{
-    for (int i = 0; i < 120; i++) 
-    {
+void test1(void) {
+    for (int i = 0; i < 120; i++) {
         char *ptr = malloc(1);
         free(ptr);
     }
 }
 
 // Use malloc() to get 120 1-byte objects, storing the pointers in an array, then use free() to deallocate the chunks
-void test2(void) 
-{
+void test2(void) {
     char *ptrArray[120];
 
-    for (int i = 0; i < 120; i++) 
-    {
+    for (int i = 0; i < 120; i++) {
         ptrArray[i] = malloc(1);
     }
 
-    for (int i = 0; i < 120; i++) 
-    {
+    for (int i = 0; i < 120; i++) {
         free(ptrArray[i]);
     }
 }
@@ -34,13 +29,11 @@ void test2(void)
     // allocating a 1-byte object and adding the pointer to the array
     // deallocating a previously allocated object
 // Once 120 allocations have been performed, deallocate all objects
-void test3(void)
-{
+void test3(void){
     char *ptrArray[120];
 
     // Initalize all pointers to null
-    for (int i = 0; i < 120; i++) 
-    {
+    for (int i = 0; i < 120; i++) {
         ptrArray[i] = NULL;
     }
 
@@ -48,30 +41,21 @@ void test3(void)
     int allocations = 0;
         
     // Keep looping till 120 allocations are performed
-    while (allocations < 120) 
-    {
-        if (count == 0 || (rand() % 2 == 0 && count < 120)) 
-        {
-            for (int j = 0; j < 120; j++) 
-            {
+    while (allocations < 120) {
+        if (count == 0 || (rand() % 2 == 0 && count < 120)) {
+            for (int j = 0; j < 120; j++) {
                 // Allocate memory to the first null pointer
-                if (ptrArray[j] == NULL) 
-                {
+                if (ptrArray[j] == NULL) {
                     ptrArray[j] = malloc(1);
                     count++;
                     allocations++;
                     break;
                 }
             }
-        } 
-            
-        else 
-        {
+        } else {
             // Free memory from the first allocated block that is found
-            for (int j = 0; j < 120; j++) 
-            {
-                if (ptrArray[j] != NULL) 
-                {
+            for (int j = 0; j < 120; j++) {
+                if (ptrArray[j] != NULL) {
                     free(ptrArray[j]);
                     ptrArray[j] = NULL;
                     count--;
@@ -82,10 +66,8 @@ void test3(void)
     }
 
     // Make sure that all the allocated memory is freed
-    for (int i = 0; i < 120; i++) 
-    {
-        if (ptrArray[i] != NULL) 
-        {
+    for (int i = 0; i < 120; i++) {
+        if (ptrArray[i] != NULL) {
             free(ptrArray[i]);
             ptrArray[i] = NULL;
         }
@@ -93,11 +75,9 @@ void test3(void)
 }
 
 
-void test4(void) 
-{
+void test4(void) {
     // Singly linked list node struct
-    typedef struct node 
-    {
+    typedef struct node {
         int data;
         struct node *next;
     } node;
@@ -105,8 +85,7 @@ void test4(void)
     node *head = NULL;
 
     // Create a linked list with 50 nodes
-    for (int i = 0; i < 50; i++) 
-    {
+    for (int i = 0; i < 50; i++) {
         node *new_node = malloc(sizeof(node));
         
         new_node -> data = i;
@@ -118,8 +97,7 @@ void test4(void)
     node *current = head;
     long sum = 0;
     
-    while (current != NULL) 
-    {
+    while (current != NULL) {
         sum += current -> data;
         current = current -> next;
     }
@@ -127,8 +105,7 @@ void test4(void)
     // Free the allocated memory
     current = head;
     
-    while (current != NULL) 
-    {
+    while (current != NULL) {
         node *temp = current;
         current = current -> next;
         free(temp);
@@ -136,22 +113,18 @@ void test4(void)
 }
 
 // BST node struct
-typedef struct bstNode 
-{
+typedef struct bstNode {
     struct bstNode *left;
     struct bstNode *right;
     int key;
 } bstNode;
 
 // Function that inserts a key into the BST structure
-bstNode* insertNodeBST(bstNode *root, int key) 
-{
-    if (root == NULL) 
-    {
+bstNode* insertNodeBST(bstNode *root, int key) {
+    if (root == NULL) {
         bstNode *new_node = malloc(sizeof(bstNode));
 
-        if (!new_node) 
-        {
+        if (!new_node) {
             exit(1);
         }
 
@@ -160,17 +133,17 @@ bstNode* insertNodeBST(bstNode *root, int key)
         return new_node;
     }
 
-    if (key < root -> key)
+    if (key < root -> key) {
         root -> left = insertNodeBST(root -> left, key);
-
-    else if (key > root -> key)
+    } else if (key > root -> key) {
         root -> right = insertNodeBST(root -> right, key);
+    }
+    
     return root;
 }
 
 // Frees memory allocated for the BST
-void freeBST(bstNode *root) 
-{
+void freeBST(bstNode *root) {
     if (root == NULL) return;
     freeBST(root -> left);
     freeBST(root -> right);
@@ -178,16 +151,13 @@ void freeBST(bstNode *root)
 }
 
 // Traverses the BST in order
-void inorder(bstNode *root) 
-{
+void inorder(bstNode *root) {
     if (root == NULL) return;
     inorder(root -> left);
     inorder(root -> right);
 }
 
-
-void test5(void) 
-{
+void test5(void) {
     bstNode *root = NULL;
     int n = 50;
 
@@ -203,8 +173,7 @@ void test5(void)
 }
 
 // Function that prints out a formatted timestamp
-void printTime(struct timeval tv, const char *label) 
-{
+void printTime(struct timeval tv, const char *label) {
     time_t sec = tv.tv_sec;
     struct tm *tm_info = localtime(&sec);
     char timeStr[64];
@@ -212,17 +181,13 @@ void printTime(struct timeval tv, const char *label)
     printf("%s: %s.%06ld\n", label, timeStr, tv.tv_usec);
 }
 
-int main(void) 
-{
+int main(void) {
     srand((unsigned int)time(NULL));
-    
     struct timeval start, end;
-    
     gettimeofday(&start, NULL); // Record starting time
     
     // Executes the test functions 50 times
-    for (int i = 0; i < 50; i++) 
-    {
+    for (int i = 0; i < 50; i++) {
         test1();
         test2();
         test3();
