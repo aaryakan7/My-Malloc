@@ -64,13 +64,13 @@ void * mymalloc(size_t size, char *file, int line) {
         initialize_heap();  // Initialize heap if not done already
     }
 
-    // Ensure alignment to 8 bytes [cite: 101, 102]
+    // Ensure alignment to 8 bytes
     size_t paddedSize = (size + 7) & ~((size_t)7);
     size_t totalSize = paddedSize + HEADER_SIZE;
     
     char *current = heap.bytes;
 
-    // Traverse the heap to find a suitable free block [cite: 87, 126]
+    // Traverse the heap to find a suitable free block
     while (current < heap.bytes + MEMLENGTH) {
         size_t header = *((size_t *)current);
         size_t chunkSize = GET_SIZE(header);
@@ -80,19 +80,19 @@ void * mymalloc(size_t size, char *file, int line) {
         if (!IS_ALLOC(header) && chunkSize >= totalSize) {
             size_t remaining = chunkSize - totalSize;
 
-            // Split only if the remaining space can form a valid 16-byte chunk [cite: 88, 103]
+            // Split only if the remaining space can form a valid 16-byte chunk
             if (remaining >= MIN_CHUNK_SIZE) {
                 *(size_t *)current = MAKE_HEADER(totalSize, 1);
                 *(size_t *)(current + totalSize) = MAKE_HEADER(remaining, 0);
             } else {
                 *(size_t *)current = MAKE_HEADER(chunkSize, 1);
             }
-            return (void *)(current + HEADER_SIZE); // Return pointer to payload [cite: 128]
+            return (void *)(current + HEADER_SIZE); // Return pointer to payload
         }
         current += chunkSize;
     }
 
-    // Spec-mandated error format [cite: 156]
+    // Spec-mandated error format
     fprintf(stderr, "malloc: Unable to allocate %zu bytes (%s:%d)\n", size, file, line);
     return NULL;
 }
@@ -103,7 +103,7 @@ void myfree(void *ptr, char *file, int line) {
         return;
     }
     
-    // Ensure the pointer range is valid [cite: 159]
+    // Ensure the pointer range is valid
     if (ptr < (void *)heap.bytes || ptr >= (void *)(heap.bytes + MEMLENGTH)) {
         fprintf(stderr, "free: Inappropriate pointer (%s:%d)\n", file, line);
         exit(2);
@@ -113,7 +113,7 @@ void myfree(void *ptr, char *file, int line) {
     size_t *target = NULL;
     int found_chunk = 0;
 
-    // Locate the block containing the pointer [cite: 90]
+    // Locate the block containing the pointer
     while (current < heap.bytes + MEMLENGTH) {
         size_t header = *(size_t *)current;
         size_t chunkSize = GET_SIZE(header);
@@ -121,7 +121,7 @@ void myfree(void *ptr, char *file, int line) {
         if (chunkSize == 0) break;
 
         if (current + HEADER_SIZE == (char *)ptr) {
-            // Check for double free [cite: 166, 170]
+            // Check for double free
             if (!IS_ALLOC(header)) {
                 fprintf(stderr, "free: Inappropriate pointer (%s:%d)\n", file, line);
                 exit(2);
@@ -131,7 +131,7 @@ void myfree(void *ptr, char *file, int line) {
             break;
         }
         
-        // Check if pointer is inside a chunk but not at the start [cite: 162, 164]
+        // Check if pointer is inside a chunk but not at the start
         if ((char *)ptr > current && (char *)ptr < current + chunkSize) {
             fprintf(stderr, "free: Inappropriate pointer (%s:%d)\n", file, line);
             exit(2);
@@ -146,11 +146,11 @@ void myfree(void *ptr, char *file, int line) {
     }
 
     size_t chunkSize = GET_SIZE(*target);
-    *target = MAKE_HEADER(chunkSize, 0);  // Mark as free [cite: 91]
+    *target = MAKE_HEADER(chunkSize, 0);  // Mark as free
     
     char *next = (char *)target + chunkSize;
 
-    // Merge with the next block if it is free [cite: 92, 96]
+    // Merge with the next block if it is free
     if (next < heap.bytes + MEMLENGTH) {
         size_t next_header = *((size_t *)next);
         size_t next_size = GET_SIZE(next_header);
@@ -164,7 +164,7 @@ void myfree(void *ptr, char *file, int line) {
     char *iter = heap.bytes;
     size_t *previous = NULL;
 
-    // Look for the previous adjacent free block [cite: 141]
+    // Look for the previous adjacent free block
     while (iter < (char *)target) {
         size_t currentHeader = *((size_t *)iter);
         size_t currentSize = GET_SIZE(currentHeader);
@@ -175,7 +175,7 @@ void myfree(void *ptr, char *file, int line) {
         iter += currentSize;
     }
     
-    // Merge with the previous block if it is free [cite: 67, 95]
+    // Merge with the previous block if it is free
     if (previous != NULL && !IS_ALLOC(*previous)) {
         size_t prev_size = GET_SIZE(*previous);
         *previous = MAKE_HEADER(prev_size + chunkSize, 0);  // Merges blocks
