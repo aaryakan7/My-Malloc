@@ -4,7 +4,7 @@
 #include <time.h>
 #include "mymalloc.h"
 
-// Task 1: malloc() and immediately free() a 1-byte object, 120 times [cite: 207]
+// Task 1: malloc() and immediately free() a 1-byte object, 120 times
 void test1(void) {
     for (int i = 0; i < 120; i++) {
         char *ptr = malloc(1);
@@ -12,7 +12,7 @@ void test1(void) {
     }
 }
 
-// Task 2: Use malloc() to get 120 1-byte objects, storing the pointers in an array, then use free() [cite: 208]
+// Task 2: Use malloc() to get 120 1-byte objects, storing the pointers in an array, then use free()
 void test2(void) {
     char *ptrArray[120];
     for (int i = 0; i < 120; i++) {
@@ -58,7 +58,7 @@ void test3(void) {
     }
 }
 
-// Task 4: Linked List manipulation (Non-trivial workload) [cite: 211, 212]
+// Task 4: Linked List manipulation (Non-trivial workload)
 void test4(void) {
     typedef struct node {
         int data;
@@ -83,7 +83,7 @@ void test4(void) {
     }
 }
 
-// Task 5: BST manipulation (Non-trivial workload) [cite: 211, 212]
+// Task 5: BST manipulation (Non-trivial workload)
 typedef struct bstNode {
     struct bstNode *left, *right;
     int key;
