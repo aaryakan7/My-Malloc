@@ -1,46 +1,40 @@
-**Authors:**
-Aarya Kansara, Subham Jena
+# My-Malloc
 
-**Memory Management:**
+## Authors
 
-Our custom allocator uses a fixed-size (4096-byte) global memory pool declared as a union to enforce 8-byte alignment.
-The heap is modeled as a sequence of variable-sized chunks. Each chunk starts with an 8-byte header stored as a size_t.
-In our implementation, the header packs the total size of the chunk (header plus payload) and an allocation flag in the least-significant bit.
-When a request is made to allocate memory, the requested size is first rounded up to a multiple of 8. If a free chunk is larger than needed, it is split; otherwise, the entire chunk is allocated.
-The free() function marks the chunk as free and automatically coalesces adjacent free chunks to reduce fragmentation.
-A leak detector is registered via atexit() during initialization. It scans the entire heap upon program termination and reports any memory that was allocated but not freed.
+Aarya Kansara and Subham Jena
 
-**Testing and Stress:**
+## Allocator design
 
-The test programs (memtest.c and memgrind.c) verify both correctness (data integrity and error detection) and performance (stress testing a large number of memory operations).
-Macros in mymalloc.h automatically replace calls to malloc() and free() with our custom versions (mymalloc() and myfree()), passing FILE and LINE for better error reporting.
+The allocator manages a fixed 4096-byte pool held in a static union aligned to `double`. Each block begins with an 8-byte header containing the total block size and an allocated flag in its low bit. Block sizes are multiples of 8, and the smallest block is 16 bytes: an 8-byte header and at least 8 payload bytes.
 
-**Correctness Tests:**
+Allocation uses first fit. Requests are rounded up to an 8-byte boundary, and a free block is split only when the remainder can hold a minimum-sized block. Freeing validates that the pointer is exactly the start of an allocated payload, then joins adjacent free blocks. Requests that do not fit return `NULL` with a diagnostic. Invalid frees print a diagnostic and exit with status 2. A detector registered during initialization reports allocated payload bytes and object count at process exit.
 
-We used the pre-developed test program (memtest.c) given to us that allocates memory using our custom malloc() and then frees it.
-The program fills each allocated object with a distinct byte pattern and then verifies that no data corruption has occurred.
-It also checks for proper error detection (e.g., freeing a non-allocated pointer or double-free).
-When memtest.c runs correctly, it reports “0 incorrect bytes.”
-As per assignment instructions, (memtest.c) was not included in the final .tar file.
+## Build and run
 
-**Stress Testing:**
+Run `make` to build `memgrind` and `memcheck`. Run them with:
 
-The program memgrind.c performs a workload of five tasks:
-- Test 1: Calls malloc() and immediately free() a 1-byte object 120 times.
-  
-- Test 2: Allocates 120 1-byte objects (storing pointers in an array) and then frees them.
-  
-- Test 3: Creates an array of 120 pointers; repeatedly makes a random choice between allocating a 1-byte object (if a slot is free) or freeing an allocated object. After 120 allocations have been performed, any remaining objects are freed.
-  
-- Test 4: Builds a singly linked list of 50 nodes, traverses it (simulating processing), and then frees all nodes.
-  
-- Test 5: Constructs a binary search tree (BST) by inserting 50 random keys, performs an in-order traversal (to simulate processing), and then frees the entire tree.
+```sh
+./memgrind
+./memcheck
+```
 
-memgrind.c runs these five tests sequentially 50 times, using gettimeofday() to record the overall start and end times.
-It then computes and displays the average time per workload iteration.
+`memgrind` runs five workloads 50 times and prints the average time per workload iteration in microseconds. `memcheck` checks alignment, separate allocations, data integrity, block reuse and coalescing, pool capacity, and overflow rejection.
 
-**Execution:**
+`memcheck` also accepts three arguments for checking invalid-free behavior. Each invocation is expected to print `free: Inappropriate pointer` and exit with status 2:
 
-To verify correctness, you can run (memgrind.c) which is provided.
-Use the provided Makefile to compile the project by running this command in the terminal: make
-To run the stress test program, execute this command in the terminal: ./memgrind
+```sh
+./memcheck outside-free
+./memcheck interior-free
+./memcheck double-free
+```
+
+## Benchmark workloads
+
+- Task 1 allocates and immediately frees a one-byte block 120 times.
+- Task 2 allocates 120 one-byte blocks, then frees them.
+- Task 3 randomly allocates or frees one-byte blocks until it has made 120 allocations, then frees any blocks left allocated.
+- Task 4 builds and frees a linked list of 50 nodes.
+- Task 5 builds and frees a binary search tree using 50 random keys.
+
+The benchmark uses `gettimeofday()` around all 50 rounds and reports the elapsed time divided by 50.
