@@ -1,4 +1,4 @@
-# My-Malloc
+# CS 214 Spring 2025 - Project I: My-Malloc
 
 ## Authors
 
